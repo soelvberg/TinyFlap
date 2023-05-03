@@ -1,6 +1,8 @@
 # TinyFlap
 
-TinyFlap is a Flappy Bird inspired game designed for the Lilygo T-QT development board with a 128x128 TFT display. The game is written in C++ and uses the following libraries:
+TinyFlap is a Flappy Bird inspired game designed for the Lilygo T-QT development board with a 128x128 TFT display. 
+
+The game uses the following libraries:
 
 - `TFT_eSPI.h` - A library for driving TFT displays using the ESP32 or ESP8266 microcontroller.
 - `Ticker.h` - A library for scheduling periodic tasks in real-time.
