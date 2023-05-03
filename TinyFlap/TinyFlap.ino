@@ -2,17 +2,11 @@
 #include <SPI.h>
 #include <Ticker.h>
 #include <Preferences.h>
-//#include <algorithm>
-//#include <math.h>
 
 #define LEFT 0
 #define RIGHT 47
 
-
-#define HIGH_SCORES "high_scores" // Consider more namespaces if many settings
-// #define PREF_WIFI_SSID "wifi_ssid"
-// #define PREF_WIFI_PASSWORD "wifi_password"
-// #define PREF_PRICE_AREA "price_area"
+#define HIGH_SCORES "high_scores"
 
 TFT_eSPI tft = TFT_eSPI();
 TFT_eSprite sprite = TFT_eSprite(&tft);
