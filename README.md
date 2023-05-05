@@ -4,13 +4,24 @@ TinyFlap is a Flappy Bird inspired game designed for the Lilygo T-QT development
 
 The game uses the following libraries:
 
-- `TFT_eSPI.h` - A library for driving TFT displays using the ESP32 or ESP8266 microcontroller.
+- `TFT_eSPI.h` - A library for driving TFT displays.
 - `Ticker.h` - A library for scheduling periodic tasks in real-time.
 - `Preferences.h` - A library for storing and retrieving persistent data in flash memory.
 
 The game has three difficulty levels to choose from, making it suitable for players of all skill levels. The goal of the game is to guide a small bird through a series of pipes by clicking a button. Players must avoid colliding with the pipes while collecting points for successfully passing through them.
 
 If you're looking for a fun and challenging game to play on your Lilygo T-QT development board, give TinyFlap a try!
+
+## TFT_eSPI library settings
+
+- Make sure to have an updated version of the library where the following "User Setup" -file exists within the library -> `\User_Setups\Setup211_LilyGo_T_QT_Pro_S3.h`
+- Modify the `User_Setup_Select.h` file in the root folder of the library and uncomment this line -> `#include <User_Setups/Setup211_LilyGo_T_QT_Pro_S3.h>`
+
+## Board configuration
+
+- Flash Size: 4 MB
+- Partition Scheme: "Default 4MB with spiffs"
+- PSRAM: "QSPI PSRAM"
 
 ## Demo
 
