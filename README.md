@@ -1,5 +1,7 @@
 # TinyFlap
 
+![demo](https://github.com/soelvberg/TinyFlap/blob/main/demo.png)
+
 TinyFlap is a Flappy Bird inspired game designed for the Lilygo T-QT development board with a 128x128 TFT display. 
 
 The game uses the following libraries:
