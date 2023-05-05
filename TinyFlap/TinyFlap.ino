@@ -2,7 +2,7 @@
 #include <SPI.h>
 #include <Ticker.h>
 #include <Preferences.h>
-#include "bg.h"
+//#include "bg.h"
 
 #define LEFT 0
 #define RIGHT 47
