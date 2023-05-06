@@ -2,7 +2,7 @@
 #include <SPI.h>
 #include <Ticker.h>
 #include <Preferences.h>
-//#include "bg.h"
+//#include "bg.h" // Using background image requires some fiddling with transparent sprites that goes on top of the image.
 
 #define LEFT 0
 #define RIGHT 47
@@ -22,7 +22,7 @@ TFT_eSprite gameOverSpr = TFT_eSprite(&tft);
 const int REFRESH_RATE = 20;
 unsigned long lastFrame = 0;
 
-bool leftHold = false;
+bool jumpButtonPressed = false;
 
 float gravity = 0.3;
 float jumpStrength = 2.2;
@@ -42,6 +42,7 @@ int pipeGapY = 60;
 int pipeGapSize = 40;
 int pipeSpeed = 2; // Even numbers only
 
+const int GROUND_STRIPE_HEIGHT = 5;
 const int GROUND_STRIPE_WIDTH = 8;
 int groundPos = 0;
 int groundSpeed = pipeSpeed / 2;
@@ -145,33 +146,33 @@ TFT_eSprite drawBird() {
   float x = (BIRD_W / 2) - 4;
   float y = BIRD_H / 2;
 
-  TFT_eSprite back_spr = TFT_eSprite(&tft);
-  back_spr.createSprite(BIRD_W + 2, BIRD_H + 2);
-  back_spr.fillSprite(TFT_SKYBLUE);
+  TFT_eSprite birdBackSpr = TFT_eSprite(&tft);
+  birdBackSpr.createSprite(BIRD_W + 2, BIRD_H + 2);
+  birdBackSpr.fillSprite(TFT_SKYBLUE);
 
-  TFT_eSprite bird_spr = TFT_eSprite(&tft);
-  bird_spr.createSprite(BIRD_W, BIRD_H);
-  bird_spr.fillSprite(TFT_SKYBLUE);
+  TFT_eSprite birdSpr = TFT_eSprite(&tft);
+  birdSpr.createSprite(BIRD_W, BIRD_H);
+  birdSpr.fillSprite(TFT_SKYBLUE);
 
   // Body and Head
-  bird_spr.fillSmoothCircle(x, y, 7, TFT_BLACK); // Body outline
-  bird_spr.fillSmoothCircle(x + 5, y, 6, TFT_BLACK); // Head outline
-  bird_spr.fillSmoothCircle(x, y, 6, birdColor);
-  bird_spr.fillSmoothCircle(x + 5, y, 5, birdColor);
+  birdSpr.fillSmoothCircle(x, y, 7, TFT_BLACK); // Body outline
+  birdSpr.fillSmoothCircle(x + 5, y, 6, TFT_BLACK); // Head outline
+  birdSpr.fillSmoothCircle(x, y, 6, birdColor);
+  birdSpr.fillSmoothCircle(x + 5, y, 5, birdColor);
 
   // Beak
-  bird_spr.fillSmoothRoundRect(x + 5, y - 1, 9, 7, 2, TFT_BLACK);
-  bird_spr.fillSmoothRoundRect(x + 6, y, 7, 5, 2, TFT_ORANGE);
-  int mouth_x = (collision) ? x + 7 : x + 8;
-  int mouth_y = (collision) ? y + 2 : y + 3;
-  int mouth_w = (collision) ? 6 : 5;
-  bird_spr.drawFastHLine(mouth_x, mouth_y, mouth_w, TFT_BLACK);
+  birdSpr.fillSmoothRoundRect(x + 5, y - 1, 9, 7, 2, TFT_BLACK);
+  birdSpr.fillSmoothRoundRect(x + 6, y, 7, 5, 2, TFT_ORANGE);
+  int mouthX = (collision) ? x + 7 : x + 8;
+  int mouthY = (collision) ? y + 2 : y + 3;
+  int mouthW = (collision) ? 6 : 5;
+  birdSpr.drawFastHLine(mouthX, mouthY, mouthW, TFT_BLACK);
 
   // Eye
-  bird_spr.fillSmoothCircle(x + 7, y - 3, 3, TFT_BLACK);
-  bird_spr.fillSmoothCircle(x + 7, y - 3, 2, TFT_WHITE);
-  int eyeBall_x = (collision) ? x + 7 : x + 8;
-  bird_spr.fillSmoothCircle(eyeBall_x, y - 3, 1, TFT_BLACK);
+  birdSpr.fillSmoothCircle(x + 7, y - 3, 3, TFT_BLACK);
+  birdSpr.fillSmoothCircle(x + 7, y - 3, 2, TFT_WHITE);
+  int eyeBallX = (collision) ? x + 7 : x + 8;
+  birdSpr.fillSmoothCircle(eyeBallX, y - 3, 1, TFT_BLACK);
 
   // Flappy wing
   if (collision) {
@@ -179,24 +180,24 @@ TFT_eSprite drawBird() {
   }
   switch(flapState) {
     case 1: // down
-      bird_spr.fillSmoothRoundRect(x - 8, y - 1, 10, 7, 2, TFT_BLACK);
-      bird_spr.fillSmoothRoundRect(x - 7, y, 8, 5, 2, birdColor);
+      birdSpr.fillSmoothRoundRect(x - 8, y - 1, 10, 7, 2, TFT_BLACK);
+      birdSpr.fillSmoothRoundRect(x - 7, y, 8, 5, 2, birdColor);
       break;
     case 2: // neutral
-      bird_spr.fillSmoothRoundRect(x - 8, y - 2, 10, 4, 2, TFT_BLACK);
-      bird_spr.fillSmoothRoundRect(x - 7, y - 1, 8, 2, 2, birdColor);
+      birdSpr.fillSmoothRoundRect(x - 8, y - 2, 10, 4, 2, TFT_BLACK);
+      birdSpr.fillSmoothRoundRect(x - 7, y - 1, 8, 2, 2, birdColor);
       break;
     case 3: // up
-      bird_spr.fillSmoothRoundRect(x - 7, y - 4, 10, 6, 2, TFT_BLACK);
-      bird_spr.fillSmoothRoundRect(x - 6, y - 3, 8, 4, 2, TFT_PINK);
+      birdSpr.fillSmoothRoundRect(x - 7, y - 4, 10, 6, 2, TFT_BLACK);
+      birdSpr.fillSmoothRoundRect(x - 6, y - 3, 8, 4, 2, TFT_PINK);
       break;
     default:
       ; 
   }
 
-  bird_spr.pushRotated(&back_spr, birdAngle, TFT_SKYBLUE);
+  birdSpr.pushRotated(&birdBackSpr, birdAngle, TFT_SKYBLUE);
 
-  return back_spr;
+  return birdBackSpr;
 }
 
 void drawCloud(int pX, int pY) {
@@ -272,7 +273,7 @@ void drawPipes() {
 
 void drawGround() {
   int screenOffsetX = -groundPos % GROUND_STRIPE_WIDTH * 2;
-  int stripeCount = (128 /*screen width*/ + GROUND_STRIPE_WIDTH) / GROUND_STRIPE_WIDTH + 1;
+  int stripeCount = (tft.width() + GROUND_STRIPE_WIDTH) / GROUND_STRIPE_WIDTH + 1;
 
   sprite.drawFastHLine(0, 128 - 7, 128, TFT_BLACK);
   sprite.drawFastHLine(0, 128 - 6, 128, TFT_BROWN);
@@ -281,17 +282,17 @@ void drawGround() {
   for (int i = 0; i < stripeCount; i++) {
     uint16_t stripeColor = (i % 2 == 0) ? TFT_GREEN : TFT_DARKGREEN;
     int x = i * GROUND_STRIPE_WIDTH + screenOffsetX;
-    int y = 128 /*screen height*/ - 5 /*GROUND_HEIGHT*/;
+    int y = tft.height() - GROUND_STRIPE_HEIGHT;
     int w = GROUND_STRIPE_WIDTH;
-    int h = 5 /*GROUND_STRIPE_HEIGHT*/;
-    if (x + w > 0 && x < 128/*tft.width()*/) {
-      sprite.fillRect(max(x, 0), y, min(w, 128 /*tft.width()*/ - x), h, stripeColor);
+    int h = GROUND_STRIPE_HEIGHT;
+    if (x + w > 0 && x < tft.width()) {
+      sprite.fillRect(max(x, 0), y, min(w, tft.width() - x), h, stripeColor);
     }
   }
 
   groundPos += groundSpeed;
 
-  // If the ground has moved past the width of the screen, reset its position
+  // If the ground has moved past the width of the screen, reset it's position
   if (groundPos >= GROUND_STRIPE_WIDTH) {
     groundPos = 0;
   }
@@ -408,8 +409,7 @@ void drawFrame() {
     drawScore();
   }
   
-  //drawBird2(bird_y);
-  drawBird().pushToSprite(&sprite, -1 /* Sprite offset */, birdY - (BIRD_H / 2), TFT_SKYBLUE);
+  drawBird().pushToSprite(&sprite, -1 /*Offset*/, birdY - (BIRD_H / 2), TFT_SKYBLUE);
 
   if (!ready) {
     drawGetReady();
@@ -498,9 +498,9 @@ void loop() {
     delay(600);
     gameOver();
 
-    while (leftHold) { // Safty to avoid unintended game reset
+    while (jumpButtonPressed) { // Safty to avoid unintended game reset
       if (digitalRead(RIGHT) == HIGH) {
-        leftHold = false;
+        jumpButtonPressed = false;
       }
     }
 
@@ -552,9 +552,9 @@ void loop() {
     if (digitalRead(RIGHT) == LOW) {
       birdSpeed = -jumpStrength;
       birdAngle = -30;
-      leftHold = true;
+      jumpButtonPressed = true;
     } else {
-      leftHold = false;
+      jumpButtonPressed = false;
     }
 
     if (digitalRead(LEFT) == LOW) {
